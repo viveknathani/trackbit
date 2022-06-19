@@ -1,3 +1,5 @@
+const interfaceOrAdapterName = prompt("Enter interface or adapter name: ")
+
 // Store data coming in from the server
 const rawData = {
     received: [0],
@@ -16,14 +18,14 @@ function run() {
 
     const graphData = new google.visualization.DataTable();
     const graphOptions = {
+        width: 800,
+        height: 300,
         hAxis: {
             title: 'Seconds'
         },
         vAxis: {
-            title: 'KB/s'
-        },
-        series: {
-            1: {curveType: 'function'}
+            title: 'KB/s',
+            minValue: 0
         }
     };
     const graph = new google.visualization.LineChart(graphDiv);
@@ -43,7 +45,7 @@ function run() {
         const index = rawData.received.length - 1;
         const received = rawData.received[index];
         const sent = rawData.sent[index];
-        graphData.addRows([[index, received, sent]]);
+        graphData.addRows([[index, sent, received]]);
         graph.draw(graphData, graphOptions);
     }
 }
@@ -67,7 +69,7 @@ function onSocketOpen(event) {
 
     // Here, "this" is the WebSocket instance.
     this.send(JSON.stringify({
-        Name: "eth0"
+        Name: interfaceOrAdapterName
     }));
 }
 
