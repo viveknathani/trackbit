@@ -1,18 +1,77 @@
-const socket = new WebSocket('ws://localhost:8081/stats');
+// Store data coming in from the server
+const rawData = {
+    received: [0],
+    sent: [0],
+    prev: {}
+}
 
-socket.onopen = function(event) {
+// The canvas
+const graphDiv = document.getElementById('graphDiv');
+
+// Refer: https://developers.google.com/chart/interactive/docs/gallery/linechart
+google.charts.load('current', {packages: ['corechart', 'line']});
+google.charts.setOnLoadCallback(run);
+
+function run() {
+
+    const graphData = new google.visualization.DataTable();
+    const graphOptions = {
+        hAxis: {
+            title: 'Seconds'
+        },
+        vAxis: {
+            title: 'KB/s'
+        },
+        series: {
+            1: {curveType: 'function'}
+        }
+    };
+    const graph = new google.visualization.LineChart(graphDiv);
+    graphData.addColumn('number', 'Seconds');
+    graphData.addColumn('number', 'Received');
+    graphData.addColumn('number', 'Sent');
+    graphData.addRows([[0, 0, 0]]);
+
+
+    const socket = new WebSocket(`ws://${window.location.host}/stats`);
+    socket.onopen = onSocketOpen;
+    socket.onerror = onSocketError;
+    socket.onclose = onSocketClose;
+    socket.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+        processAndAppendServerData(data);
+        const index = rawData.received.length - 1;
+        const received = rawData.received[index];
+        const sent = rawData.sent[index];
+        graphData.addRows([[index, received, sent]]);
+        graph.draw(graphData, graphOptions);
+    }
+}
+
+// Server sends data via a WebSocket connection.
+function processAndAppendServerData(serverData) {
+
+    if (Object.keys(rawData.prev).length !== 0) {
+        const receivedKiloBytes = (serverData.BytesReceived - rawData.prev.BytesReceived) / 1024;
+        const sentKiloBytes = (serverData.BytesSent - rawData.prev.BytesSent) / 1024;
+        rawData.sent.push(receivedKiloBytes);
+        rawData.received.push(sentKiloBytes);
+    }
+    rawData.prev = serverData;
+}
+
+// Utility functions for websockets
+
+function onSocketOpen(event) {
     console.log('connection established.');
-    socket.send(JSON.stringify({
+
+    // Here, "this" is the WebSocket instance.
+    this.send(JSON.stringify({
         Name: "eth0"
     }));
 }
 
-socket.onmessage = function(event) {
-    const data = JSON.parse(event.data)
-    console.log(data);
-}
-
-socket.onclose = function(event) {
+function onSocketClose(event) {
     if (event.wasClean) {
         console.log("connection closed.");
     } else {
@@ -20,6 +79,6 @@ socket.onclose = function(event) {
     }
 }
 
-socket.onerror = function(error) {
+function onSocketError(error) {
     console.log(error);
 }
