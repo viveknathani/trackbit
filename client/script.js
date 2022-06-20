@@ -1,3 +1,4 @@
+const MAX_VISIBLE_SECONDS = 60;
 const interfaceOrAdapterName = prompt("Enter interface or adapter name: ")
 
 // Store data coming in from the server
@@ -46,6 +47,9 @@ function run() {
         const received = rawData.received[index];
         const sent = rawData.sent[index];
         graphData.addRows([[index, sent, received]]);
+        if (graphData.getNumberOfRows() >= MAX_VISIBLE_SECONDS) {
+            graphData.removeRow(0);
+        }
         graph.draw(graphData, graphOptions);
     }
 }
@@ -84,3 +88,4 @@ function onSocketClose(event) {
 function onSocketError(error) {
     console.log(error);
 }
+
