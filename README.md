@@ -1,5 +1,9 @@
 # trackbit
 
+[![test](https://github.com/viveknathani/trackbit/actions/workflows/test.yaml/badge.svg)](https://github.com/viveknathani/trackbit/actions/workflows/test.yaml) 
+[![Go Report Card](https://goreportcard.com/badge/github.com/viveknathani/trackbit)](https://goreportcard.com/report/github.com/viveknathani/trackbit)
+[![Maintainability](https://api.codeclimate.com/v1/badges/8cb48a1915d7c46d3667/maintainability)](https://codeclimate.com/github/viveknathani/trackbit/maintainability) ![release](https://img.shields.io/github/v/release/viveknathani/trackbit)
+
 trackbit is a network throughput monitoring tool, built for Windows and Linux. It grabs the network information from your OS so it does not sniff your packets.
 
 <img src="./SCREENSHOT.PNG">
