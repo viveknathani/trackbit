@@ -1,3 +1,5 @@
+import { getGraphEntities, processAndAppendServerData } from "./common.js";
+
 const MAX_VISIBLE_SECONDS = 60;
 const interfaceOrAdapterName = prompt("Enter interface or adapter name: ")
 
@@ -8,41 +10,23 @@ const rawData = {
     prev: {}
 }
 
-// The canvas
-const graphDiv = document.getElementById('graphDiv');
-
 // Refer: https://developers.google.com/chart/interactive/docs/gallery/linechart
 google.charts.load('current', {packages: ['corechart', 'line']});
 google.charts.setOnLoadCallback(run);
 
 function run() {
 
-    const graphData = new google.visualization.DataTable();
-    const graphOptions = {
-        width: 800,
-        height: 300,
-        hAxis: {
-            title: 'Seconds'
-        },
-        vAxis: {
-            title: 'KB/s',
-            minValue: 0
-        }
-    };
-    const graph = new google.visualization.LineChart(graphDiv);
-    graphData.addColumn('number', 'Seconds');
-    graphData.addColumn('number', 'Received');
-    graphData.addColumn('number', 'Sent');
-    graphData.addRows([[0, 0, 0]]);
-
-
+    const graphEntites = getGraphEntities();
+    const graph = graphEntites[0];
+    const graphData = graphEntites[1];
+    const graphOptions = graphEntites[2];
     const socket = new WebSocket(`ws://${window.location.host}/stats`);
     socket.onopen = onSocketOpen;
     socket.onerror = onSocketError;
     socket.onclose = onSocketClose;
     socket.onmessage = function(event) {
         const data = JSON.parse(event.data);
-        processAndAppendServerData(data);
+        processAndAppendServerData(rawData, data);
         const index = rawData.received.length - 1;
         const received = rawData.received[index];
         const sent = rawData.sent[index];
@@ -54,24 +38,13 @@ function run() {
     }
 }
 
-// Server sends data via a WebSocket connection.
-function processAndAppendServerData(serverData) {
-
-    if (Object.keys(rawData.prev).length !== 0) {
-        const receivedKiloBytes = (serverData.BytesReceived - rawData.prev.BytesReceived) / 1024;
-        const sentKiloBytes = (serverData.BytesSent - rawData.prev.BytesSent) / 1024;
-        rawData.sent.push(receivedKiloBytes);
-        rawData.received.push(sentKiloBytes);
-    }
-    rawData.prev = serverData;
-}
-
 // Utility functions for websockets
 
 function onSocketOpen(event) {
     console.log('connection established.');
 
     // Here, "this" is the WebSocket instance.
+    localStorage.setItem("iface", interfaceOrAdapterName)
     this.send(JSON.stringify({
         Name: interfaceOrAdapterName
     }));
