@@ -29,7 +29,16 @@ From the root of this project,
 make build
 make run
 # or you can invoke the command manually to specify the port, default is 8080
-./bin/trackbit -port=8081 # any port number
+./bin/trackbit -=port=8081 # any port number
+```
+
+# running in the background
+
+You can setup `trackbit` to keep collecting network info in the background and dump the info to a file, `trackbit.json` upon shutdown. You will be asked to enter a path to the directory of this file for this. If you want to view your history, click the history button on the homepage. 
+
+To setup in this way, here is an example:  
+```bash
+./bin/trackbit --port=8081 --path=./bin
 ```
 
 ## similar projects
