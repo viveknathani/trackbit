@@ -36,7 +36,7 @@ make run
 ./bin/trackbit -=port=8081 # any port number
 ```
 
-# running in the background
+## running in the background
 
 You can setup `trackbit` to keep collecting network info in the background and dump the info to a file, `trackbit.json` upon shutdown. You will be asked to enter a path to the directory of this file for this. If you want to view your history, click the history button on the homepage. 
 
